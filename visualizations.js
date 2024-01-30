@@ -4,6 +4,7 @@ const PLOT_HEIGHT = 800;
 const ROTATION_SENSITIVITY = 75;
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+
 let svg, mainGroup, mapPath, mapProjection, colorMapping, mapTitle, infoTooltip, hoveredCountry, hoveredData;
 let isCountryHovered = false;
 
