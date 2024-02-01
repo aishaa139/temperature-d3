@@ -17,7 +17,7 @@ const monthNames = [
 
 const firstYear = 1901;
 const lastYear = 2020;
-let country = "FRA";
+let country = "ALB";
 let year = firstYear;
 let month = 0;
 
