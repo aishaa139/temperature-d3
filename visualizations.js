@@ -14,33 +14,58 @@ function rotateMap(event) {
   mapProjection.rotate([rotation[0] + event.dx * k, rotation[1] - event.dy * k]);
   mainGroup.selectAll("path").attr("d", mapPath);
 }
-
-function updatechart(topo, data, month) {
+function updatechart(topo, data, month, selectedCountry) {
   const transition = d3.transition().duration(100);
   const currentYear = data.values().next().value[0].Year;
-  //mapTitle.text(`${MONTHS[month]}, ${currentYear}`);
   mapTitle.text(`${currentYear}`);
 
   const choroMap = mainGroup.selectAll("path").data(topo.features);
   choroMap.exit().remove();
 
-  choroMap.enter().append("path").merge(choroMap).attr("class", "Country").transition(transition).attr("d", mapPath).attr("fill", function (d) {
-    d.total = data.get(d.properties["iso_a3"]);
-    return d.total ? colorMapping(d.total[month].Temperature) : "#808080"; //default color to gray
-  });
+  choroMap.enter()
+    .append("path")
+    .merge(choroMap)
+    .attr("class", "Country")
+    .transition(transition)
+    .attr("d", mapPath)
+    .attr("fill", function (d) {
+      // Default color for countries without data
+      let defaultColor = "#808080";
+      if (d.properties["iso_a3"] === selectedCountry) {
+        // Highlight the selected country
+        return "#EE82EE"; // Highlight color: violet
+      } else {
+        d.total = data.get(d.properties["iso_a3"]);
+        return d.total ? colorMapping(d.total[month].Temperature) : defaultColor;
+      }
+    });
 
   choroMap.on("pointermove", function (event, d) {
     isCountryHovered = true;
     hoveredCountry = d.total ? d.total[0].ISO3 : null;
     hoveredData = hoveredCountry ? data.get(hoveredCountry)[month] : { Country: "No available data", Temperature: "" };
-    infoTooltip.html(hoveredData.Country + "<br/>" + hoveredData.Temperature + "℃");
-    infoTooltip.style("left", event.pageX + 10 + "px").style("top", event.pageY - 28 + "px").transition().duration(100).style("opacity", 0.9).style("font-size", "10px");
-    d3.selectAll(".Country").transition().duration(50).style("opacity", 0.5);
-    d3.select(this).transition().duration(50).style("opacity", 1).style("stroke", "#0A0A0A").style("stroke-width", "0.5px");
+    infoTooltip.html(hoveredData.Country + "<br/>" + hoveredData.Temperature + "℃")
+      .style("left", event.pageX + 10 + "px")
+      .style("top", event.pageY - 28 + "px")
+      .transition().duration(100)
+      .style("opacity", 0.9)
+      .style("font-size", "10px");
+    d3.selectAll(".Country")
+      .transition().duration(50)
+      .style("opacity", 0.5);
+    d3.select(this)
+      .transition().duration(50)
+      .style("opacity", 1)
+      .style("stroke", "#0A0A0A")
+      .style("stroke-width", "0.5px");
   }).on("pointerleave", function (event) {
     isCountryHovered = false;
-    d3.selectAll(".Country").transition().duration(50).style("opacity", 1);
-    d3.select(this).transition().duration(50).style("stroke", "none");
+    d3.selectAll(".Country")
+      .transition().duration(50)
+      .style("opacity", 1);
+    d3.select(this)
+      .transition().duration(50)
+      .style("stroke", "none");
     infoTooltip.transition().duration(100).style("opacity", 0);
   });
 
@@ -89,7 +114,6 @@ const HEIGHT = 500 - MARGIN.TOP - MARGIN.BOTTOM;
 
 let svg0, x, y, colorScale, xAxisGroup, yAxisGroup, tooltip;
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
 function initChart(canvasElement) {
   // Visualization canvas
   svg0 = d3.select(canvasElement)
@@ -104,16 +128,32 @@ function initChart(canvasElement) {
   y = d3.scaleLinear().range([HEIGHT, 0]).domain([-40, 35]);
 
   // Color scale
-  colorScale = d3.scaleLinear().domain([-30, 0, 35]).range(["#FF4500", "#FFD700", "#008000"]); // Using the same color scheme as the last modified code
+  colorScale = d3.scaleLinear().domain([-30, 0, 35]).range(["#FF4500", "#FFD700", "#008000"]);
 
   // Axes initialization
   xAxisGroup = svg0.append("g").attr("class", "x axis").attr("transform", "translate(0," + HEIGHT + ")");
   yAxisGroup = svg0.append("g").attr("class", "y axis");
 
+  // Add y-axis label
+  svg0.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - MARGIN.LEFT)
+    .attr("x", 0 - (HEIGHT / 2))
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text("Average temperature in degrees Celsius");
+
+  // Add x-axis label
+  svg0.append("text")
+    .attr("class", "x axis-label")
+    .attr("x", WIDTH / 2)
+    .attr("y", HEIGHT + MARGIN.BOTTOM - 5)
+    .style("text-anchor", "middle")
+    .text("Months"); // The text of your x-axis label
+
   // Tooltip placeholder
   tooltip = d3.select(".tooltip");
 }
-
 function updateChart(data) {
   // Update scales
   x.domain(data.map(d => d.Statistics.slice(0, 3)));
