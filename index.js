@@ -15,7 +15,7 @@ const monthNames = [
   "December",
 ];
 
-const firstYear = 1901;
+const firstYear = 1920;
 const lastYear = 2020;
 let country = "ALB";
 let year = firstYear;
