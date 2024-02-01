@@ -15,9 +15,9 @@ const monthNames = [
   "December",
 ];
 
-const firstYear = 1920;
+const firstYear = 1910;
 const lastYear = 2020;
-let country = "ALB";
+let country = "RUS";
 let year = firstYear;
 let month = 0;
 
@@ -54,7 +54,7 @@ Promise.all(dataPromises).then(function (data) {
     const countryData = yearData.get(country);
     viz.updateChart(countryData);
     viz.updateAreaChart(countryData);
-    viz.updatechart(topoData, yearData, month);
+    viz.updatechart(topoData, yearData, month,country);
   }
   updateCharts();
 
